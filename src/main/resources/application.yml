@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: assured
+  datasource:
+    url: jdbc:mysql://10.36.1.54:3306/uc?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&failOverReadOnly=false&allowMultiQueries=true&useSSL=false
+    username: root
+    password: dev@1234
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 10
+  redis: #redis≈‰÷√
+    host: 10.36.1.54
+    port: 6379
+    password: dev@1234
+    timeout: 3s
+  cache:
+    redis:
+      time-to-live: 600s
