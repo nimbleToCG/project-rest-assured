@@ -33,7 +33,7 @@ public class BasicFeatures {
         String userName = "18684691776";
         String loginPassword = "aaaa1111";
         int id = 1;
-        String apiUrl = "http://10.36.0.185:9797/uc/api/login";
+        String apiUrl = "http://10.36.4.185:9797/uc/api/login";
         String param = "loginType="+loginType+"&userName="+userName+"&loginPassword="+loginPassword;
         String userInfo = LoginTestService.GetUserInfo(id,apiUrl,param);
     }

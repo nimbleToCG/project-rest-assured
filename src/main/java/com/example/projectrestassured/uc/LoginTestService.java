@@ -2,11 +2,8 @@ package com.example.projectrestassured.uc;
 
 import io.restassured.RestAssured;
 import io.restassured.config.SSLConfig;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-
-import static io.restassured.RestAssured.given;
-import static io.restassured.config.EncoderConfig.encoderConfig;
+import io.restassured.specification.RequestSpecification;
 
 /**
  * @ClassName LoginTestService
@@ -24,15 +21,17 @@ public class LoginTestService {
      * @return UserDetail
      */
     public static String GetUserInfo(int ID, String ApiUrl, String Param) throws Exception {
-        Response response = given()
-                .config(RestAssured.config().encoderConfig(encoderConfig().encodeContentTypeAs("form-data", ContentType.TEXT)))
-                .contentType("form-data; charset=UTF-8")
-                .header("did","iphone")
-                .log().all()
-                .request()
-                .body(Param)
-                .when()
-                .post(ApiUrl);
+//        Response response = given()
+//                .header("did","iphone")
+//                .
+//                .log().all()
+//                .request()
+//                .body(Param)
+//                .when()
+//                .post(ApiUrl);
+        String key = "did";
+        String value = "iphone";
+        Response response = (Response)((RequestSpecification)RestAssured.given().config(RestAssured.config().sslConfig((new SSLConfig()).relaxedHTTPSValidation())).contentType("application/x-www-form-urlencoded; charset=UTF-8").header(key,value).log().all()).request().body(Param).when().post(ApiUrl, new Object[0]);
 
         response.print();
         String Json = response.asString();
