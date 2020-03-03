@@ -3,6 +3,7 @@ package demo;
 import com.example.projectrestassured.common.RequestValueService;
 import com.example.projectrestassured.module.uc.LoginTestService;
 
+import com.example.projectrestassured.utils.ExcelUtils;
 import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -63,11 +64,8 @@ public class BasicFeatures {
     @Test
     public void LoginTestForExcel() throws Exception {
 
-        String fileToBeRead = "D:\\dome_01.xls";//要打開的Excel的位置
-        HSSFWorkbook workbook = new HSSFWorkbook(new FileInputStream(fileToBeRead));
-        // 創建對工作表的引用
-        HSSFSheet sheet = workbook.getSheet("Sheet1");//讀取第一張工作表 Sheet1
-        List dataList = requestValueService.list(code);
+        String fileToBeRead = "F:\\dome_01.xlsx";//要打開的Excel的位置
+        List dataList = ExcelUtils.readExcle(fileToBeRead);
         log.info("excle封裝的數據："+dataList);
 
 //      for(int i=0;i<getRequestValue.list(s).size();i++){
