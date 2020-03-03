@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/project-rest-assured.iml" filepath="$PROJECT_DIR$/project-rest-assured.iml" />
+      <module fileurl="file://$PROJECT_DIR$/test_automation.iml" filepath="$PROJECT_DIR$/test_automation.iml" />
     </modules>
   </component>
 </project>
