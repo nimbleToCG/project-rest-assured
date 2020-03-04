@@ -12,8 +12,7 @@ import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -28,111 +27,95 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 @Slf4j
 public class ExcelUtils {
-
-  /**
-   * 读取EXCLE文件的方法入口
-   *
-   * @param path 路径
-   */
-  public static List<List<String>> readExcle(String path) throws IOException {
-
-    String type = path.substring(path.lastIndexOf(".") + 1).toLowerCase();
-    InputStream input = new FileInputStream(path);
-    List<List<String>> result = new ArrayList<List<String>>();
-    if ("xlsx".equals(type)) {
-      result = readXlsx(input);
-    }
-//        else if ("xls".equals(type)) {
-//            result = readXls(input);
-//        }
-    return result;
-  }
-
-  public static List<List<String>> readXlsx(InputStream input) throws IOException {
-    List<List<String>> result = new ArrayList<List<String>>();
-    XSSFWorkbook workbook = new XSSFWorkbook(input);
-    for (Sheet xssfSheet : workbook) {
-      if (xssfSheet == null) {
-        continue;
-      }
-      if (xssfSheet.getLastRowNum() <= 0) {
-        continue;
-      }
-      int cols = xssfSheet.getRow(0).getLastCellNum();
-      for (int rowNum = 1; rowNum <= xssfSheet.getLastRowNum(); rowNum++) {
-        XSSFRow row = (XSSFRow) xssfSheet.getRow(rowNum);
-        List<String> rowList = new ArrayList<String>();
-        for (int i = 0; i < cols; i++) {
-          XSSFCell cell = row.getCell(i);
-          if (cell == null) {
-            //continue;
-            rowList.add("");
-          } else {
-            rowList.add(cell.toString());
-          }
+    //读取excel
+    public static List<Map<String, String>> readExcel(String filePath) throws IOException {
+        Workbook workbook = null;
+        if (filePath == null) {
+            return null;
         }
-        result.add(rowList);
-      }
-    }
-    return result;
-  }
-
-  public static List<List<String>> readXls(InputStream input) throws IOException {
-    List<List<String>> result = new ArrayList<List<String>>();
-    HSSFWorkbook workbook = new HSSFWorkbook(input);
-    for (int numSheet = 0; numSheet < workbook.getNumberOfSheets(); numSheet++) {
-      HSSFSheet sheet = workbook.getSheetAt(numSheet);
-      if (sheet == null) {
-        continue;
-      }
-      if (sheet.getLastRowNum() <= 0) {
-        continue;
-      }
-      int cols = sheet.getRow(0).getLastCellNum();
-      for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
-        HSSFRow row = sheet.getRow(rowNum);
-        List<String> rowList = new ArrayList<String>();
-        for (int i = 0; i < cols; i++) {
-          HSSFCell cell = row.getCell(i);
-          if (cell == null) {
-            //continue;
-            rowList.add("");
-          } else {
-            rowList.add(getStringVal(cell));
-          }
-        }
-        result.add(rowList);
-      }
-    }
-    return result;
-  }
-
-  private static String getStringVal(HSSFCell cell) {
-
-    switch (cell.getCellType()) {
-
-      case BOOLEAN:
-        return cell.getBooleanCellValue() ? "TRUE" : "FALSE";
-      case FORMULA:
-        return cell.getCellFormula();
-      case NUMERIC:
-        String value = "";
-        // 如果为时间格式的内容
-        if (HSSFDateUtil.isCellDateFormatted(cell)) {
-          // 注：format格式 yyyy-MM-dd hh:mm:ss
-          // 中小时为12小时制，若要24小时制，则把小h变为H即可，yyyy-MM-dd HH:mm:ss
-          SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-          value = sdf.format(HSSFDateUtil.getJavaDate(cell.getNumericCellValue())).toString();
+        String type = filePath.substring(filePath.lastIndexOf(".") + 1).toLowerCase();
+        InputStream inputStream = new FileInputStream(filePath);
+        if ("xls".equals(type)) {
+            workbook = new HSSFWorkbook(inputStream);
+        } else if ("xlsx".equals(type)) {
+            workbook = new XSSFWorkbook(inputStream);
         } else {
-          cell.setCellType(CellType.STRING);
-          return value = cell.getStringCellValue();
+            return null;
         }
-        return value;
 
-      case STRING:
-        return cell.getStringCellValue();
-      default:
-        return null;
+        return getTestData(workbook);
     }
-  }
+
+    /**
+     * * 读取sheet里的接口用例参数：
+     *
+     * @param workbook
+     * @return
+     */
+    public static List<Map<String, String>> getTestData(Workbook workbook) {
+
+        List<Map<String, String>> sheetlist = new ArrayList<>();
+        String columns[] = {"id", "module_name", "case_code", "case_name", "case_description", "is_run", "api_url", "path", "mothod", "param_type", "params"};
+
+        //获取sheet
+        for (Sheet xssfSheet : workbook) {
+
+            //获取最大行数
+            int rownum = xssfSheet.getPhysicalNumberOfRows();
+            //获取最大列数
+            int colnum = xssfSheet.getRow(0).getPhysicalNumberOfCells();
+
+            //循环遍历各个sheets的行和列值添加到List集合
+            for (int i = 1; i < rownum; i++) {
+                Map<String, String> map = new LinkedHashMap<String, String>();
+                Row row = xssfSheet.getRow(i);
+                if (row != null) {
+                    for (int j = 0; j < colnum; j++) {
+                        String cellData = (String) getCellFormatValue(row.getCell(j));
+                        map.put(columns[j], cellData);
+                    }
+                } else {
+                    break;
+                }
+                sheetlist.add(map);
+            }
+
+        }
+        return sheetlist;
+    }
+
+    public static Object getCellFormatValue(Cell cell) {
+        Object cellValue = null;
+        if (cell != null) {
+
+            //判断cell类型
+            switch (cell.getCellType()) {
+
+                case NUMERIC: {
+                    cellValue = String.valueOf(cell.getNumericCellValue());
+                    break;
+                }
+                case FORMULA: {
+                    //判断cell是否为日期格式
+                    if (DateUtil.isCellDateFormatted(cell)) {
+                        //转换为日期格式YYYY-mm-dd
+                        cellValue = cell.getDateCellValue();
+                    } else {
+                        //数字
+                        cellValue = String.valueOf(cell.getNumericCellValue());
+                    }
+                    break;
+                }
+                case STRING: {
+                    cellValue = cell.getRichStringCellValue().getString();
+                    break;
+                }
+                default:
+                    cellValue = "";
+            }
+        } else {
+            cellValue = "";
+        }
+        return cellValue;
+    }
 }
